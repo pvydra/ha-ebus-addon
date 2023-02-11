@@ -1,41 +1,22 @@
-FROM debian:stretch as build
+ARG BUILD_FROM
+FROM $BUILD_FROM as image
 
-RUN apt-get update && apt-get install -y \
-    libmosquitto-dev libstdc++6 libc6 libgcc1 \
-    curl \
-    autoconf automake g++ make git \
-    && rm -rf /var/lib/apt/lists/*
+ARG EBUSD_ARCH=amd64
+ARG S6_OVERLAY_VERSION=3.1.3.0
 
-WORKDIR /build
+ENV EBUSD_VERSION 23.1
+ENV EBUSD_IMAGE=bullseye
 
-ENV EBUSD_ARCH amd64
-ENV EBUSD_VERSION 22.4
-
-RUN git clone https://github.com/john30/ebusd.git /build \
-    && ./make_debian.sh
-
-
-FROM debian:stretch-slim
-
-RUN apt-get update && apt-get install -y \
-    libmosquitto1 libssl1.1 ca-certificates libstdc++6 libc6 libgcc1 \
-    jq \
-	setserial \	
-    && rm -rf /var/lib/apt/lists/*
 
 LABEL maintainer "ebusd@ebusd.eu"
+LABEL version="${EBUSD_VERSION}-${EBUSD_ARCH}"
 
-ENV EBUSD_VERSION 22.4
-ENV EBUSD_ARCH amd64
+RUN apt-get update && apt-get install -y libmosquitto1 ca-certificates setserial
 
-LABEL version "${EBUSD_VERSION}-${EBUSD_ARCH}-devel"
-
-COPY --from=build /build/ebusd-*_mqtt1.deb ebusd.deb
+ADD https://github.com/john30/ebusd/releases/download/${EBUSD_VERSION}/ebusd-${EBUSD_VERSION}_${EBUSD_ARCH}-${EBUSD_IMAGE}_mqtt1.deb ebusd.deb
 
 RUN dpkg -i ebusd.deb \
-    && rm -f ebusd.deb
+    && rm -f ebusd.deb \
+	&& update-ca-certificates
 
-EXPOSE 8888
-
-COPY docker-entrypoint.sh /
-ENTRYPOINT ["/docker-entrypoint.sh"]
+COPY rootfs /

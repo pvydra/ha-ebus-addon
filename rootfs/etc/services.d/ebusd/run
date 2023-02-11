@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bashio
+
+if bashio::services.available "mqtt"; then
+    bashio::log.info "Found internal MQTT service found"
+	MQTTHOST=$(bashio::services "mqtt" "host")
+	MQTTUSER=$(bashio::services "mqtt" "username")
+	MQTTPASS=$(bashio::services "mqtt" "password")
+	MQTTPORT=$(bashio::services "mqtt" "port")
+else
+	bashio::log.info "No internal MQTT service found, using settings from configuration"
+	MQTTHOST=$(bashio::config "mqtthost")
+	MQTTUSER=$(bashio::config "mqttuser")
+	MQTTPASS=$(bashio::config "mqttpass")
+	MQTTPORT=$(bashio::config "mqttport")
+fi
+
+DEVICE=$(bashio::config 'device')
+
+if bashio::config.true "lowLatency"; then
+ bashio::log.info "Set device to low latency"
+ setserial $DEVICE low_latency
+fi
+
+bashio::log.info "Starting eBusd on ${DEVICE}"
+
+exec ebusd -f --scanconfig --mqttport=${MQTTPORT} --mqtthost=${MQTTHOST} --mqttuser=${MQTTUSER} --mqttpass=${MQTTPASS} --mqttretain --mqttint=/etc/ebusd/mqtt-hassio.cfg --mqttjson --device=${DEVICE}

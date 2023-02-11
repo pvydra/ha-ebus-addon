@@ -1,0 +1,19 @@
+configuration:
+  mqttport:
+    name: MQTT broker port
+    description: Default 1883
+  mqtthost:
+    name: MQTT broker host
+    description:
+  mqttuser:
+    name: MQTT broker user name
+    description:
+  mqttpass:
+    name: MQTT broker password
+    description: Recommended to save to secrets.yaml and use value "!secret mqtt_password"
+  device:
+    name: eBus adapter device name
+    description:
+  lowLatency:
+    name: Set device to low latency
+    description:

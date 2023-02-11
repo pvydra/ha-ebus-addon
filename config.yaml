@@ -1,0 +1,27 @@
+---
+name: ebusd
+version: 1.0.31
+slug: ebusd
+description: eBUS daemon
+arch:
+- armv7
+- aarch64
+- amd64
+- i386
+options:
+  mqttport:
+  mqtthost:
+  mqttuser:
+  mqttpass:
+  device:
+  lowLatency: "false"
+schema:
+  mqttport: int(0,32000)?
+  mqtthost: str?
+  mqttuser: str?
+  mqttpass: str?
+  device: device
+  lowLatency: bool
+services:
+- 'mqtt:want'
+init: false
